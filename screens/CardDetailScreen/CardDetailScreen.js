@@ -3,7 +3,7 @@ import { Button, View, Alert } from 'react-native';
 
 import { notify } from '../../utils/events';
 import { getCard, addCard, updateCard, removeCard } from '../../utils/api';
-import { Screen, Form, Title, BackButton, BigButton } from '../../components';
+import { Screen, Form, Title, BackButton } from '../../components';
 
 class AddCardScreen extends Component {
   state = {
@@ -126,7 +126,7 @@ class AddCardScreen extends Component {
     return (
       <View>
         {!creating && (
-          <BigButton title="remove card" onPress={() => this.removeCard()} />
+          <Button title="remove card" onPress={() => this.removeCard()} />
         )}
       </View>
     );

@@ -4,7 +4,6 @@ import { Button, View, Alert } from 'react-native';
 import { notify } from '../../utils/events';
 import { getDeck, addDeck, updateDeck, removeDeck } from '../../utils/api';
 import {
-  BigButton,
   BackButton,
   Screen,
   Title,
@@ -88,8 +87,8 @@ class DeckDetailScreen extends Component {
       creating || editing ? (
         <Button title="save" onPress={() => this.saveDeck()} />
       ) : (
-        <Button title="edit" onPress={() => this.toggleEditState()} />
-      );
+          <Button title="edit" onPress={() => this.toggleEditState()} />
+        );
 
     return (
       <Title leftButton={<BackButton />} rightButton={button}>
@@ -130,13 +129,13 @@ class DeckDetailScreen extends Component {
     return (
       <View>
         {!creating && (
-          <BigButton
+          <Button
             title="add/remove cards"
             onPress={() => navigation.navigate('AddCard', { id: deck.id })}
           />
         )}
         {!creating && (
-          <BigButton title="remove deck" onPress={() => this.deleteDeck()} />
+          <Button title="remove deck" onPress={() => this.deleteDeck()} />
         )}
       </View>
     );

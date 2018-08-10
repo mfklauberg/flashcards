@@ -5,7 +5,6 @@ import List from './List/List';
 import ListItem from './List/ListItem';
 import SelectListItem from './List/SelectListItem';
 
-import BigButton from './Button/BigButton';
 import BackButton from './Button/BackButton';
 import RadioButton from './Button/RadioButton';
 
@@ -23,7 +22,6 @@ export {
   Title,
   Input,
   BackButton,
-  BigButton,
   RadioButton,
   SelectListItem
 };
