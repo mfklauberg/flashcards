@@ -8,11 +8,8 @@ const error = (message) => {
 const DATA = '@flashcards/data';
 const SETTINGS = '@flashcards/settings';
 
-const CARDS = `${DATA}/cards`;
 const DECKS = `${DATA}/decks`;
-
-const USE_TIMER = `${SETTINGS}/timer`;
-const TIMER_DURATION = `${SETTINGS}/timer_duration`;
+const NOTIFICATION = `${SETTINGS}/notification`;
 
 function set(key, items) {
   return AsyncStorage.setItem(key, JSON.stringify(items));
@@ -86,35 +83,43 @@ function removeItem(key, id) {
   });
 }
 
-export const getCards = () => get(CARDS);
 export const getDecks = () => get(DECKS);
 
-export const getCard = (id) => getItem(CARDS, id);
 export const getDeck = (id) => getItem(DECKS, id);
 
-export const addCard = (parameters) => addItem(CARDS, parameters);
+export const addCard = (deckId, parameters) => {
+  return getDeck(deckId).then((deck) => {
+    const card = {
+      id: guid(),
+      ...parameters
+    };
+
+    const modifiedDeck = {
+      ...deck,
+      cards: [...deck.cards, card]
+    };
+
+    return updateDeck(deckId, modifiedDeck);
+  });
+};
+
 export const addDeck = (parameters) =>
   addItem(DECKS, { ...parameters, cards: [] });
 
-export const updateCard = (id, parameters) => updateItem(CARDS, id, parameters);
 export const updateDeck = (id, parameters) => updateItem(DECKS, id, parameters);
-
-export const removeCard = (id) => {
-  removeItem(CARDS, id);
-
-  return getDecks()
-    .then((decks) => decks.filter((deck) => deck.cards.includes(id)))
-    .then((decks) => {
-      return decks.forEach((deck) => {
-        const cards = deck.cards.filter((card) => card !== id);
-
-        updateDeck(deck.id, { ...deck, cards });
-      });
-    });
-};
 
 export const removeDeck = (id) => removeItem(DECKS, id);
 
+export const getNotification = () =>
+  AsyncStorage.getItem(NOTIFICATION).then(JSON.parse);
+
+export const setNotification = () =>
+  AsyncStorage.setItem(NOTIFICATION, JSON.parse(true));
+
+export const clearNotification = () => {
+  return AsyncStorage.removeItem(NOTIFICATION);
+};
+
 function clear() {
-  AsyncStorage.multiRemove([CARDS, DECKS]);
+  AsyncStorage.multiRemove([DECKS, NOTIFICATION]);
 }

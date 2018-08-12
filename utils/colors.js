@@ -8,6 +8,6 @@ export const grey75 = '#212121';
 export const red = '#ff5454';
 export const blue = '#008ee8';
 export const green = '#3fb763';
-export const orange = 'ff9514';
+export const orange = '#ff9514';
 export const white = '#ffffff';
 export const yellow = '#ffdb1f';

@@ -1,110 +1,56 @@
 import React, { Component } from 'react';
-import { Button, View, Alert } from 'react-native';
+import { Button } from 'react-native';
 
 import { notify } from '../../utils/events';
-import { getCard, addCard, updateCard, removeCard } from '../../utils/api';
+import { addCard } from '../../utils/api';
 import { Screen, Form, Title, BackButton } from '../../components';
 
 class AddCardScreen extends Component {
   state = {
+    deck: '',
     card: {
       answer: '',
       question: ''
     },
-    editing: false,
-    creating: false
   };
 
   componentDidMount() {
     const { navigation } = this.props;
 
-    const id = navigation.getParam('id');
-
-    id && this.fetchCard(id);
-    this.setState({ creating: navigation.getParam('creating') });
+    const deck = navigation.getParam('deck');
+    this.setState({ deck });
   }
 
-  toggleEditState = () =>
-    this.setState((prevState) => ({ editing: !prevState.editing }));
-
-  fetchCard = (id) => {
-    getCard(id).then((card) => this.setState({ card }));
-  };
-
   saveCard = () => {
-    const { navigation } = this.props;
-    const { card, creating, editing } = this.state;
-
-    const parameters = { ...card };
-
-    if (creating) {
-      return addCard(parameters).then(() => {
-        notify('Card');
-        navigation.goBack();
-      });
-    }
-
-    if (editing) {
-      this.toggleEditState();
-
-      return updateCard(card.id, parameters).then(() => {
-        notify('Card');
-      });
-    }
-  };
-
-  removeCard = () => {
-    const { card } = this.state;
+    const { card, deck } = this.state;
     const { navigation } = this.props;
 
-    const remove = () => {
-      removeCard(card.id).then(() => {
-        notify('Card');
-        notify('Deck');
-
-        navigation.goBack();
-      });
-    };
-
-    Alert.alert(
-      'remove card',
-      'By removing this card, it will also be removed from all decks which may contain it. Are you sure?',
-      [
-        { text: 'Yes', onPress: () => remove() },
-        { text: 'No', style: 'cancel' }
-      ]
-    );
+    addCard(deck, { ...card }).then(() => {
+      notify('Deck');
+      notify(`Deck_${deck}`);
+      navigation.goBack();
+    });
   };
 
   renderTitle = () => {
-    const { card, creating, editing } = this.state;
-
-    const text = creating ? 'Add card' : card.question;
-    const button =
-      creating || editing ? (
-        <Button title="save" onPress={() => this.saveCard()} />
-      ) : (
-        <Button title="edit" onPress={() => this.toggleEditState()} />
-      );
+    const backButton = <BackButton />;
+    const saveButton = <Button title="save" onPress={() => this.saveCard()} />
 
     return (
-      <Title leftButton={<BackButton />} rightButton={button}>
-        {text}
+      <Title leftButton={backButton} rightButton={saveButton}>
+        Add Card
       </Title>
     );
   };
 
   renderContent = () => {
-    const { card, creating, editing } = this.state;
-
-    const editable = creating || editing;
+    const { card } = this.state;
     const onChange = (field) => (text) => (card[field] = text);
 
     return (
       <Form>
         <Input
           label="Question"
-          editable={editable}
           value={card.question}
           onChangeText={onChange('question')}
         />
@@ -112,23 +58,10 @@ class AddCardScreen extends Component {
           lines={3}
           label="Answer"
           multiline={true}
-          editable={editable}
           value={card.answer}
           onChangeText={onChange('answer')}
         />
       </Form>
-    );
-  };
-
-  renderButtons = () => {
-    const { creating } = this.state;
-
-    return (
-      <View>
-        {!creating && (
-          <Button title="remove card" onPress={() => this.removeCard()} />
-        )}
-      </View>
     );
   };
 
@@ -137,7 +70,6 @@ class AddCardScreen extends Component {
       <Screen>
         {this.renderTitle()}
         {this.renderContent()}
-        {this.renderButtons()}
       </Screen>
     );
   }

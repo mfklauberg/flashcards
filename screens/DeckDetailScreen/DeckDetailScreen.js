@@ -1,14 +1,15 @@
 import React, { Component } from 'react';
 import { Button, View, Alert } from 'react-native';
 
-import { notify } from '../../utils/events';
+import { notify, subscribe } from '../../utils/events';
 import { getDeck, addDeck, updateDeck, removeDeck } from '../../utils/api';
 import {
   BackButton,
   Screen,
   Title,
   Input,
-  Form
+  Form,
+  Actions
 } from '../../components';
 
 class DeckDetailScreen extends Component {
@@ -26,10 +27,18 @@ class DeckDetailScreen extends Component {
 
     const id = navigation.getParam('id');
 
-    id && this.fetchDeck(id);
     this.setState({ creating: navigation.getParam('creating') });
 
+    if (id) {
+      id && this.fetchDeck(id);
 
+      const eventName = `Deck_${id}`;
+      this.unsubscribe = subscribe(eventName, () => this.fetchDeck(id));
+    }
+  }
+
+  componentWillUnmount() {
+    this.unsubscribe && this.unsubscribe();
   }
 
   toggleEditState = () =>
@@ -73,9 +82,9 @@ class DeckDetailScreen extends Component {
       });
     };
 
-    Alert.alert('Remove Deck', 'Are you sure?', [
-      { text: 'Yes', onPress: () => remove() },
-      { text: 'No', style: 'cancel' }
+    Alert.alert('REMOVE DECK', 'Are you sure?', [
+      { text: 'Confirm', onPress: () => remove() },
+      { text: 'Cancel', style: 'cancel' }
     ]);
   };
 
@@ -83,15 +92,14 @@ class DeckDetailScreen extends Component {
     const { creating, editing, deck } = this.state;
 
     const text = creating ? 'Add deck' : deck.title;
-    const button =
-      creating || editing ? (
-        <Button title="save" onPress={() => this.saveDeck()} />
-      ) : (
-          <Button title="edit" onPress={() => this.toggleEditState()} />
-        );
+
+    const saveButton = <Button title="save" onPress={() => this.saveDeck()} />;
+    const editButton = <Button title="edit" onPress={() => this.toggleEditState()} />;
+
+    const rightButton = (creating || editing) ? saveButton : editButton;
 
     return (
-      <Title leftButton={<BackButton />} rightButton={button}>
+      <Title leftButton={<BackButton />} rightButton={rightButton}>
         {text}
       </Title>
     );
@@ -126,18 +134,16 @@ class DeckDetailScreen extends Component {
     const { navigation } = this.props;
     const { deck, creating } = this.state;
 
+    if (creating) {
+      return null;
+    }
+
     return (
-      <View>
-        {!creating && (
-          <Button
-            title="add/remove cards"
-            onPress={() => navigation.navigate('AddCard', { id: deck.id })}
-          />
-        )}
-        {!creating && (
-          <Button title="remove deck" onPress={() => this.deleteDeck()} />
-        )}
-      </View>
+      <Actions>
+        <Button title="add card" onPress={() => navigation.navigate('CardDetail', { deck: deck.id })}/>
+        <Button title="start quiz" onPress={() => navigation.navigate('Quiz', { deck: deck.id })}/>
+        <Button title="remove deck" onPress={() => this.deleteDeck()} />
+      </Actions>
     );
   };
 
